@@ -1,2 +1,2 @@
-# redumd
-A Redux Framework
+redumd, A Redux Framework
+========
