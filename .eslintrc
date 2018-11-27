@@ -1,0 +1,6 @@
+{
+  "extends": "eslint-config-ease-base",
+  "rules": {
+    "func-names": 0
+  }
+}
