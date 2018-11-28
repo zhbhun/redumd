@@ -4,5 +4,6 @@ import Model from './Model';
 import Page from './Page';
 import DetailPage from './DetailPage';
 import ListPage from './ListPage';
+import Schema from './Schema';
 
-export { DetailPage, Entities, entities, init, ListPage, Model, Page };
+export { DetailPage, Entities, entities, init, ListPage, Model, Page, Schema };
