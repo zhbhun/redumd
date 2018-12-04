@@ -22,7 +22,8 @@
     "node": ">= 6"
   },
   "files": [
-    "lib"
+    "lib",
+    "saga"
   ],
   "main": "lib/index.js",
   "scripts": {
@@ -42,16 +43,18 @@
       "git add"
     ]
   },
+  "peerDependencies": {
+    "redux": "^4.0.0"
+  },
   "dependencies": {
-    "@babel/runtime-corejs2": "^7.1.5",
-    "lodash.difference": "^4.5.0",
-    "lodash.merge": "^4.6.1",
-    "lodash.union": "^4.6.0",
-    "lodash.without": "^4.4.0",
-    "normalizr": "^3.3.0",
-    "redux": "^4.0.1",
-    "redux-devtools-extension": "^2.13.5",
-    "redux-saga": "^0.16.2"
+    "@babel/runtime-corejs2": "^7.0.0",
+    "lodash.difference": "^4.0.0",
+    "lodash.merge": "^4.0.0",
+    "lodash.union": "^4.0.0",
+    "lodash.without": "^4.0.0",
+    "normalizr": "^3.0.0",
+    "redux-devtools-extension": "^2.0.0",
+    "redux-saga": "^0.16.0"
   },
   "devDependencies": {
     "@babel/cli": "^7.1.2",
