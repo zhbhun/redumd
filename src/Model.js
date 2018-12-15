@@ -124,6 +124,22 @@ class Model {
 
   getState = state => state[this.namespace];
 
+  *cancel({ payload: ignore }) {
+    try {
+      const taskKeys = Object.keys(this.tasks);
+      for (let i = taskKeys.length - 1; i >= 0; i -= 1) {
+        const key = taskKeys[i];
+        const task = this.tasks[key];
+        if (key !== ignore && task) {
+          yield cancel(task);
+        }
+      }
+    } catch (error) {
+      // eslint-disable-next-line
+      console.error(error);
+    }
+  }
+
   *destroy() {
     try {
       const watcherKeys = Object.keys(this.watcher);
