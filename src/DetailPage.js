@@ -22,6 +22,9 @@ class DetailPage extends Page {
   };
 
   static reducers = {
+    reset(state, { payload }) {
+      return payload;
+    },
     initiateRequest(state, { payload }) {
       return {
         ...state,
@@ -96,10 +99,18 @@ class DetailPage extends Page {
 
   *initiate({ payload: id }) {
     try {
+      // 根据 ID 是否变化来重置状态
+      const currId = yield select(this.getId);
+      if (currId && currId !== id) {
+        yield put(this.actions.cancel('initiate'));
+        yield put(this.actions.reset(this.defaultState));
+      }
+      // 避免重复加载
       const { loading } = yield select(this.getInitiate);
       if (loading) {
         return;
       }
+      // 加载数据
       yield put(this.actions.initiateRequest(id));
       const { data } = yield call(this.api, id);
       const entities = this.schema.create(data);
@@ -112,9 +123,27 @@ class DetailPage extends Page {
 
   *initiateIfNeed({ payload }) {
     try {
+      // 根据 ID 是否变化来重置状态
+      const id = yield select(this.getId);
+      if (id && id !== payload) {
+        yield put(this.actions.cancel('initiateIfNeed'));
+        yield put(this.actions.reset(this.defaultState));
+      }
+      // 避免重复加载
       const isInitiated = yield select(this.isInitiated);
       if (!isInitiated) {
         yield put(this.actions.initiate(payload));
+      }
+    } catch (err) {
+      // ignore
+    }
+  }
+
+  *refresh() {
+    try {
+      const id = yield select(this.getId);
+      if (id) {
+        yield put(this.actions.initiate(id));
       }
     } catch (err) {
       // ignore
