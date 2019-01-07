@@ -122,7 +122,7 @@ class Model {
       }
     };
     // 状态处理
-    this.reduce = (state = defaultState, action) => {
+    this.reducer = (state = defaultState, action) => {
       const reduceProcess = reducers[action.type];
       if (typeof reduceProcess === 'function') {
         return reduceProcess(state, action);

@@ -49,17 +49,17 @@ const init = config => {
     const modelMap = {};
     for (let i = models.length - 1; i >= 0; i -= 1) {
       const model = models[i];
-      const { namespace, reduce } = model;
+      const { namespace, reducer } = model;
       const keys = namespace.split('/');
       if (keys.length >= 2) {
-        let object = reduce;
+        let object = reducer;
         for (let j = keys.length - 1; j >= 0; j -= 1) {
           const key = keys[j];
           object = { [key]: object };
         }
         merge(modelMap, object);
       } else {
-        modelReducers[namespace] = reduce;
+        modelReducers[namespace] = reducer;
       }
     }
     const reducers = Object.assign(

@@ -70,7 +70,7 @@ new Model(namespace)
 
 ## Methods
 
-### `model.reduce()`
+### `model.reducer()`
 
 reducer 处理函数
 
