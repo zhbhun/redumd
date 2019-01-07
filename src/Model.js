@@ -1,4 +1,3 @@
-import merge from 'lodash.merge';
 import { cancel, call, fork, takeEvery } from 'redux-saga/effects';
 
 const TYPE_DIVIDED_SYMBOLS = '/';
@@ -21,8 +20,8 @@ const extractReducers = instance => {
   let prototype = Object.getPrototypeOf(instance);
   let constructor = prototype && prototype.constructor;
   while (constructor && (constructor.defaultState || constructor.reducers)) {
-    reducers = merge({}, constructor.reducers, reducers);
-    defaultState = merge({}, constructor.defaultState, defaultState);
+    reducers = Object.assign({}, constructor.reducers, reducers);
+    defaultState = Object.assign({}, constructor.defaultState, defaultState);
     prototype = Object.getPrototypeOf(prototype);
     constructor = prototype && prototype.constructor;
   }
