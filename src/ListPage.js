@@ -3,6 +3,7 @@ import Page from './Page';
 
 class ListPage extends Page {
   static defaultState = {
+    params: null, // 查询参数
     initiate: {
       error: null, // 初始化错误信息
       loading: false, // 初始化加载中
@@ -19,9 +20,10 @@ class ListPage extends Page {
   };
 
   static reducers = {
-    initiateRequest(state) {
+    initiateRequest(state, { payload: params }) {
       return {
         ...state,
+        params,
         initiate: {
           error: null,
           loading: true,
@@ -111,6 +113,7 @@ class ListPage extends Page {
     this.schema = schema;
 
     // selectors
+    this.getParams = state => this.getState(state).params;
     this.getMeta = state => this.getState(state).meta;
     this.getPage = state => this.getMeta(state).page;
     this.hasMore = state => this.getMeta(state).hasMore;
@@ -123,7 +126,7 @@ class ListPage extends Page {
     };
   }
 
-  *initiate({ payload }) {
+  *initiate({ payload: parmas }) {
     try {
       const { loading } = yield select(this.getInitiate);
       if (loading) {
@@ -133,8 +136,8 @@ class ListPage extends Page {
         // 避免同时进行更多数据请求和刷新请求（思考：同时请求，刷新接口先响应时分页加载数据会附加到刷新后的数据中）
         yield cancel(this.tasks.loadMore);
       }
-      yield put(this.actions.initiateRequest());
-      const { data, meta, ...others } = yield call(this.api, 1, payload);
+      yield put(this.actions.initiateRequest(parmas));
+      const { data, meta, ...others } = yield call(this.api, 1, parmas);
       const entities = this.schema.create(data);
       yield put(this.entities.actions.append(entities));
       yield put(
@@ -150,17 +153,13 @@ class ListPage extends Page {
   }
 
   *initiateIfNeed({ payload }) {
-    try {
-      const isInitiated = yield select(this.isInitiated);
-      if (!isInitiated) {
-        yield put(this.actions.initiate(payload));
-      }
-    } catch (err) {
-      // ignore
+    const isInitiated = yield select(this.isInitiated);
+    if (!isInitiated) {
+      yield put(this.actions.initiate(payload));
     }
   }
 
-  *loadMore({ payload }) {
+  *loadMore() {
     try {
       const hasMore = yield select(this.hasMore);
       if (!hasMore) {
@@ -174,9 +173,10 @@ class ListPage extends Page {
       if (moreLoading) {
         return;
       }
+      const params = yield select(this.getParams);
       yield put(this.actions.loadMoreRequest());
       const page = yield select(this.getPage);
-      const { data, meta, ...others } = yield call(this.api, page + 1, payload);
+      const { data, meta, ...others } = yield call(this.api, page + 1, params);
       const entities = this.schema.create(data);
       yield put(this.entities.actions.append(entities));
       yield put(
@@ -196,6 +196,11 @@ class ListPage extends Page {
         yield put(this.actions.loadMoreFailure(null));
       }
     }
+  }
+
+  *refresh() {
+    const payload = yield select(this.getParams);
+    yield put(this.actions.initiate(payload));
   }
 }
 
