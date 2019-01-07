@@ -1,3 +1,4 @@
+import merge from 'lodash.mergewith';
 import { createStore, applyMiddleware, compose, combineReducers } from 'redux';
 import createSagaMiddleware from 'redux-saga';
 import { all, call } from 'redux-saga/effects';
@@ -9,6 +10,20 @@ if (process.env.NODE_ENV !== 'production') {
   composeEnhancers = composeWithDevTools;
 }
 const entities = new Entities();
+const combineDeepReducers = reducersMap => {
+  const result = {};
+  const reducerMapKeys = Object.keys(reducersMap);
+  for (let i = reducerMapKeys.length - 1; i >= 0; i -= 1) {
+    const key = reducerMapKeys[i];
+    const reducer = reducersMap[key];
+    if (typeof reducer === 'object') {
+      result[key] = combineReducers(combineDeepReducers(reducer));
+    } else {
+      result[key] = reducer;
+    }
+  }
+  return result;
+};
 
 /**
  * @param {object} config
@@ -21,17 +36,38 @@ const entities = new Entities();
  * @param {object} config.entities
  */
 const init = config => {
-  let reducers = { ...(config.reducers || {}) };
+  // model
   const models = [...(config.models || []), config.entities || entities];
   const modelsMap = {};
-
-  // reducers
   models.forEach(model => {
-    reducers[model.namespace] = model.reduce;
     modelsMap[model.namespace] = model;
   });
+
+  // reducer
   const mergeReducers = (nextReducers = {}) => {
-    reducers = { ...reducers, ...nextReducers };
+    const modelReducers = {};
+    const modelMap = {};
+    for (let i = models.length - 1; i >= 0; i -= 1) {
+      const model = models[i];
+      const { namespace, reduce } = model;
+      const keys = namespace.split('/');
+      if (keys.length >= 2) {
+        let object = reduce;
+        for (let j = keys.length - 1; j >= 0; j -= 1) {
+          const key = keys[j];
+          object = { [key]: object };
+        }
+        merge(modelMap, object);
+      } else {
+        modelReducers[namespace] = reduce;
+      }
+    }
+    const reducers = Object.assign(
+      combineDeepReducers(modelMap),
+      modelReducers,
+      config.reducers,
+      nextReducers
+    );
     if (Object.keys(reducers).length === 0) {
       return state => state;
     }
@@ -73,31 +109,29 @@ const init = config => {
       if (typeof newModels === 'string') {
         return modelsMap[newModels];
       }
-      const modelReducers = {};
-      (Array.isArray(newModels) ? newModels : [newModels]).forEach(item => {
-        if (!reducers[item.namespace]) {
+      const newModelsArray = Array.isArray(newModels) ? newModels : [newModels];
+      newModelsArray.forEach(item => {
+        if (!modelsMap[item.namespace]) {
           models.push(item);
-          modelReducers[item.namespace] = item.reduce;
           modelsMap[item.namespace] = item;
           sagaMiddleware.run(item.effect);
         }
       });
-      store.replaceReducer(mergeReducers(modelReducers));
+      store.replaceReducer(mergeReducers());
       return newModels;
     },
     unmodel(rmModels) {
-      (Array.isArray(rmModels) ? rmModels : [rmModels]).forEach(item => {
-        if (reducers[item.namespace]) {
+      const rmModelsArray = Array.isArray(rmModels) ? rmModels : [rmModels];
+      rmModelsArray.forEach(item => {
+        if (modelsMap[item.namespace]) {
           const index = models.indexOf(item);
           store.dispatch(item.actions.destroy());
           models.splice(index, 1);
-          reducers[item.namespace] = undefined;
-          delete reducers[item.namespace];
           modelsMap[item.namespace] = undefined;
           delete modelsMap[item.namespace];
         }
       });
-      store.replaceReducer(combineReducers(reducers));
+      store.replaceReducer(mergeReducers());
     },
   };
 };

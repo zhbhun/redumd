@@ -48,6 +48,12 @@ const extractGeneratorFunctions = instance => {
   }
   return effects;
 };
+const makStateGetter = keys => state => {
+  if (keys.length <= 1) {
+    return state[keys[0]];
+  }
+  return makStateGetter(keys.slice(1))(state[keys[0]]);
+};
 
 /**
  * 状态管理模型
@@ -57,6 +63,7 @@ class Model {
     const selft = this;
 
     this.namespace = namespace; // 命名空间
+    this.namespaceKeys = namespace.split('/');
     this.types = {}; // 动作类型
     this.actions = {}; // 动作创建器
     this.selectors = {}; // 状态选择器
@@ -95,7 +102,10 @@ class Model {
       const keys = Object.keys(effects || {});
       for (let i = 0; i < keys.length; i += 1) {
         const key = keys[i];
-        const type = key.indexOf('/') >= 0 ? key : makeType(namespace, key);
+        const type =
+          key.indexOf(TYPE_DIVIDED_SYMBOLS) >= 0
+            ? key
+            : makeType(namespace, key);
         const effectFunc = effects[key].bind(selft);
         const callEffectFunc = function*(...args) {
           yield call(effectFunc, ...args);
@@ -107,7 +117,7 @@ class Model {
         const watcher = function*() {
           yield takeEvery(type, folkEffectFunc);
         };
-        selft[key] = effectFunc;
+        selft[key] = folkEffectFunc;
         selft.watcher[key] = yield fork(watcher);
       }
     };
@@ -119,9 +129,9 @@ class Model {
       }
       return state;
     };
-  }
 
-  getState = state => state[this.namespace];
+    this.getState = makStateGetter(this.namespaceKeys);
+  }
 
   *cancel({ payload: ignore }) {
     try {
