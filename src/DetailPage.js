@@ -122,31 +122,23 @@ class DetailPage extends Page {
   }
 
   *initiateIfNeed({ payload }) {
-    try {
-      // 根据 ID 是否变化来重置状态
-      const id = yield select(this.getId);
-      if (id && id !== payload) {
-        yield put(this.actions.cancel('initiateIfNeed'));
-        yield put(this.actions.reset(this.defaultState));
-      }
-      // 避免重复加载
-      const isInitiated = yield select(this.isInitiated);
-      if (!isInitiated) {
-        yield put(this.actions.initiate(payload));
-      }
-    } catch (err) {
-      // ignore
+    // 根据 ID 是否变化来重置状态
+    const id = yield select(this.getId);
+    if (id && id !== payload) {
+      yield put(this.actions.cancel('initiateIfNeed'));
+      yield put(this.actions.reset(this.defaultState));
+    }
+    // 避免重复加载
+    const isInitiated = yield select(this.isInitiated);
+    if (!isInitiated) {
+      yield put(this.actions.initiate(payload));
     }
   }
 
   *refresh() {
-    try {
-      const id = yield select(this.getId);
-      if (id) {
-        yield put(this.actions.initiate(id));
-      }
-    } catch (err) {
-      // ignore
+    const id = yield select(this.getId);
+    if (id) {
+      yield put(this.actions.initiate(id));
     }
   }
 }
