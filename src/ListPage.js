@@ -5,11 +5,13 @@ class ListPage extends Page {
   static defaultState = {
     params: null, // 查询参数
     initiate: {
-      error: null, // 初始化错误信息
+      error: null, // 初始化错误
+      message: null, // 初始化信息
       loading: false, // 初始化加载中
     },
     loadMore: {
-      error: null, // 分页加载错误信息
+      error: null, // 分页加载错误
+      message: null, // 分页加载信息
       loading: false, // 分页加载中
     },
     meta: {
@@ -26,15 +28,17 @@ class ListPage extends Page {
         params,
         initiate: {
           error: null,
+          message: null,
           loading: true,
         },
       };
     },
-    initiateFailure(state, { payload }) {
+    initiateFailure(state, { payload: error }) {
       return {
         ...state,
         initiate: {
-          error: payload,
+          error: error && error.code ? error.code : -1,
+          message: error && error.message ? error.message : '加载失败了',
           loading: false,
         },
       };
@@ -49,6 +53,7 @@ class ListPage extends Page {
         ...state,
         initiate: {
           error: null,
+          message: null,
           loading: false,
         },
         meta: {
@@ -63,15 +68,17 @@ class ListPage extends Page {
         ...state,
         loadMore: {
           error: null,
+          message: null,
           loading: true,
         },
       };
     },
-    loadMoreFailure(state, { payload }) {
+    loadMoreFailure(state, { payload: error }) {
       return {
         ...state,
         loadMore: {
-          error: payload,
+          error: error && error.code ? error.code : -1,
+          message: error && error.message ? error.message : '加载失败了',
           loading: false,
         },
       };
@@ -86,6 +93,7 @@ class ListPage extends Page {
         ...state,
         loadMore: {
           error: null,
+          message: null,
           loading: false,
         },
         meta: {
@@ -126,7 +134,7 @@ class ListPage extends Page {
     };
   }
 
-  *initiate({ payload: parmas }) {
+  *initiate(action) {
     try {
       const { loading } = yield select(this.getInitiate);
       if (loading) {
@@ -136,8 +144,13 @@ class ListPage extends Page {
         // 避免同时进行更多数据请求和刷新请求（思考：同时请求，刷新接口先响应时分页加载数据会附加到刷新后的数据中）
         yield cancel(this.tasks.loadMore);
       }
-      yield put(this.actions.initiateRequest(parmas));
-      const { data, meta, ...others } = yield call(this.api, 1, parmas);
+      yield put(this.actions.initiateRequest(action.payload));
+      const { data, meta, ...others } = yield call(
+        this.api,
+        1,
+        action.payload,
+        action.meta
+      );
       const entities = this.schema.create(data);
       yield put(this.entities.actions.append(entities));
       yield put(
@@ -148,14 +161,14 @@ class ListPage extends Page {
         })
       );
     } catch (err) {
-      yield put(this.actions.initiateFailure(err.message));
+      yield put(this.actions.initiateFailure(err));
     }
   }
 
-  *initiateIfNeed({ payload }) {
+  *initiateIfNeed(action) {
     const isInitiated = yield select(this.isInitiated);
     if (!isInitiated) {
-      yield put(this.actions.initiate(payload));
+      yield put(this.actions.initiate(action.payload, action.meta));
     }
   }
 
@@ -190,7 +203,7 @@ class ListPage extends Page {
         })
       );
     } catch (err) {
-      yield put(this.actions.loadMoreFailure(err.message));
+      yield put(this.actions.loadMoreFailure(err));
     } finally {
       if (yield cancelled()) {
         yield put(this.actions.loadMoreFailure(null));
@@ -198,9 +211,9 @@ class ListPage extends Page {
     }
   }
 
-  *refresh() {
+  *refresh(action) {
     const payload = yield select(this.getParams);
-    yield put(this.actions.initiate(payload));
+    yield put(this.actions.initiate(action.payload || payload, action.meta));
   }
 }
 
