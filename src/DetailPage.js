@@ -16,7 +16,8 @@ class DetailPage extends Page {
   static defaultState = {
     id: null, // 业务 ID
     initiate: {
-      error: null, // 初始化错误信息
+      error: null, // 初始化错误
+      message: null, // 初始化信息
       loading: false, // 初始化加载中
     },
   };
@@ -31,15 +32,17 @@ class DetailPage extends Page {
         id: payload,
         initiate: {
           error: null,
+          message: null,
           loading: true,
         },
       };
     },
-    initiateFailure(state, { payload }) {
+    initiateFailure(state, { payload: error }) {
       return {
         ...state,
         initiate: {
-          error: payload,
+          error: error && error.code ? error.code : -1,
+          message: error && error.message ? error.message : '加载失败了',
           loading: false,
         },
       };
@@ -49,6 +52,7 @@ class DetailPage extends Page {
         ...state,
         initiate: {
           error: null,
+          message: null,
           loading: false,
         },
       };
@@ -97,11 +101,11 @@ class DetailPage extends Page {
       this.schema.getEntity(this.entities.getState(state), this.getId(state));
   }
 
-  *initiate({ payload: id }) {
+  *initiate(action) {
     try {
       // 根据 ID 是否变化来重置状态
       const currId = yield select(this.getId);
-      if (currId && currId !== id) {
+      if (currId && currId !== action.payload) {
         yield put(this.actions.cancel('initiate'));
         yield put(this.actions.reset(this.defaultState));
       }
@@ -111,34 +115,34 @@ class DetailPage extends Page {
         return;
       }
       // 加载数据
-      yield put(this.actions.initiateRequest(id));
-      const { data } = yield call(this.api, id);
+      yield put(this.actions.initiateRequest(action.payload));
+      const { data } = yield call(this.api, action.payload, action.meta);
       const entities = this.schema.create(data);
       yield put(this.entities.actions.append(entities));
       yield put(this.actions.initiateSuccess());
     } catch (err) {
-      yield put(this.actions.initiateFailure(err.message));
+      yield put(this.actions.initiateFailure(err));
     }
   }
 
-  *initiateIfNeed({ payload }) {
+  *initiateIfNeed(action) {
     // 根据 ID 是否变化来重置状态
     const id = yield select(this.getId);
-    if (id && id !== payload) {
+    if (id && id !== action.payload) {
       yield put(this.actions.cancel('initiateIfNeed'));
       yield put(this.actions.reset(this.defaultState));
     }
     // 避免重复加载
     const isInitiated = yield select(this.isInitiated);
     if (!isInitiated) {
-      yield put(this.actions.initiate(payload));
+      yield put(this.actions.initiate(action.payload, action.meta));
     }
   }
 
-  *refresh() {
+  *refresh(action) {
     const id = yield select(this.getId);
-    if (id) {
-      yield put(this.actions.initiate(id));
+    if (action.payload || id) {
+      yield put(this.actions.initiate(action.payload || id, action.meta));
     }
   }
 }
