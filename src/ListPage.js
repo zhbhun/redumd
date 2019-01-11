@@ -19,6 +19,7 @@ class ListPage extends Page {
       hasMore: false, // 是否有更多数据
     },
     data: null, // 分页数据
+    extras: null, // 额外数据
   };
 
   static reducers = {
@@ -46,7 +47,7 @@ class ListPage extends Page {
     initiateSuccess(
       state,
       {
-        payload: { meta, data },
+        payload: { meta, data, extras },
       }
     ) {
       return {
@@ -61,6 +62,7 @@ class ListPage extends Page {
           ...meta,
         },
         data,
+        extras,
       };
     },
     loadMoreRequest(state) {
@@ -126,6 +128,7 @@ class ListPage extends Page {
     this.getPage = state => this.getMeta(state).page;
     this.hasMore = state => this.getMeta(state).hasMore;
     this.getData = state => this.getState(state).data || [];
+    this.getExtras = state => this.getState(state).extras;
     this.getInitiate = state => this.getState(state).initiate;
     this.getLoadMore = state => this.getState(state).loadMore;
     this.isInitiated = state => {
@@ -145,7 +148,7 @@ class ListPage extends Page {
         yield cancel(this.tasks.loadMore);
       }
       yield put(this.actions.initiateRequest(action.payload));
-      const { data, meta, ...others } = yield call(
+      const { data, meta, extras } = yield call(
         this.api,
         1,
         action.payload,
@@ -157,7 +160,7 @@ class ListPage extends Page {
         this.actions.initiateSuccess({
           meta,
           data: this.schema.getResult(entities),
-          others,
+          extras,
         })
       );
     } catch (err) {
@@ -189,7 +192,7 @@ class ListPage extends Page {
       const params = yield select(this.getParams);
       yield put(this.actions.loadMoreRequest());
       const page = yield select(this.getPage);
-      const { data, meta, ...others } = yield call(this.api, page + 1, params);
+      const { data, meta } = yield call(this.api, page + 1, params);
       const entities = this.schema.create(data);
       yield put(this.entities.actions.append(entities));
       yield put(
@@ -199,7 +202,6 @@ class ListPage extends Page {
             page: meta.page || page + 1,
           },
           data: this.schema.getResult(entities),
-          others,
         })
       );
     } catch (err) {
