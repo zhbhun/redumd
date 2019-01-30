@@ -117,8 +117,7 @@ class DetailPage extends Page {
       // 加载数据
       yield put(this.actions.initiateRequest(action.payload));
       const { data } = yield call(this.api, action.payload, action.meta);
-      const entities = this.schema.create(data);
-      yield put(this.entities.actions.append(entities));
+      yield put(this.entities.actions.append(data, this.schema));
       yield put(this.actions.initiateSuccess());
     } catch (err) {
       yield put(this.actions.initiateFailure(err));
