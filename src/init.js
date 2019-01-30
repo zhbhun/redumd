@@ -103,27 +103,39 @@ const init = config => {
   return {
     ...store,
     /**
-     * @param {array} models
+     * @param {array|string} models 如果为字符串则返回对应的 model 实例，否则必须是对象且合并到现有的 model 集合中
      */
     model(newModels) {
       if (typeof newModels === 'string') {
         return modelsMap[newModels];
       }
+      let hasChange = false;
       const newModelsArray = Array.isArray(newModels) ? newModels : [newModels];
       newModelsArray.forEach(item => {
-        if (!modelsMap[item.namespace]) {
+        const preModel = modelsMap[item.namespace];
+        if (
+          !preModel ||
+          // 热加载时 Model 类可能会发生变化
+          Object.getPrototypeOf(preModel).constructor !==
+            Object.getPrototypeOf(item).constructor
+        ) {
+          hasChange = true;
           models.push(item);
           modelsMap[item.namespace] = item;
           sagaMiddleware.run(item.effect);
         }
       });
-      store.replaceReducer(mergeReducers());
+      if (hasChange) {
+        store.replaceReducer(mergeReducers());
+      }
       return newModels;
     },
     unmodel(rmModels) {
+      let hasChange = false;
       const rmModelsArray = Array.isArray(rmModels) ? rmModels : [rmModels];
       rmModelsArray.forEach(item => {
         if (modelsMap[item.namespace]) {
+          hasChange = true;
           const index = models.indexOf(item);
           store.dispatch(item.actions.destroy());
           models.splice(index, 1);
@@ -131,7 +143,9 @@ const init = config => {
           delete modelsMap[item.namespace];
         }
       });
-      store.replaceReducer(mergeReducers());
+      if (hasChange) {
+        store.replaceReducer(mergeReducers());
+      }
     },
   };
 };
