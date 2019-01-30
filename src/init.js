@@ -6,8 +6,10 @@ import Entities from './Entities';
 
 let composeEnhancers = compose;
 if (process.env.NODE_ENV !== 'production') {
-  const { composeWithDevTools } = require('redux-devtools-extension');
-  composeEnhancers = composeWithDevTools;
+  if (typeof window !== 'undefined') {
+    const { composeWithDevTools } = require('redux-devtools-extension');
+    composeEnhancers = composeWithDevTools;
+  }
 }
 const entities = Entities.instance;
 const combineDeepReducers = reducersMap => {
