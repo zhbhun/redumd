@@ -39,6 +39,10 @@ class Entities extends Model {
   }
 }
 
-Entities.instance = new Entities();
+let defaultInstance = new Entities();
+Entities.getInstance = () => defaultInstance;
+Entities.setInstance = instance => {
+  defaultInstance = instance;
+};
 
 export default Entities;

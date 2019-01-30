@@ -7,7 +7,7 @@ import ListPage from './ListPage';
 import NormalPage from './NormalPage';
 import Schema from './Schema';
 
-const entities = Entities.instance;
+const entities = Entities.getInstance();
 
 export {
   DetailPage,

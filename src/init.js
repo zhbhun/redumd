@@ -11,7 +11,6 @@ if (process.env.NODE_ENV !== 'production') {
     composeEnhancers = composeWithDevTools;
   }
 }
-const entities = Entities.instance;
 const combineDeepReducers = reducersMap => {
   const result = {};
   const reducerMapKeys = Object.keys(reducersMap);
@@ -38,8 +37,15 @@ const combineDeepReducers = reducersMap => {
  * @param {object} config.entities
  */
 const init = config => {
+  // config
+  if (config.entities) {
+    Entities.setInstance(config.entities);
+  }
   // model
-  const models = [...(config.models || []), config.entities || entities];
+  const models = [
+    ...(config.models || []),
+    config.entities || Entities.getInstance(),
+  ];
   const modelsMap = {};
   models.forEach(model => {
     modelsMap[model.namespace] = model;

@@ -1,4 +1,5 @@
 import { call, put, select } from 'redux-saga/effects';
+import Entities from './Entities';
 import Page from './Page';
 
 /**
@@ -71,7 +72,7 @@ class DetailPage extends Page {
 
     // options
     this.api = api;
-    this.entities = entities;
+    this.entities = entities || Entities.getInstance();
     this.schema = schema;
 
     // selectors
@@ -97,8 +98,7 @@ class DetailPage extends Page {
      * 获取业务详情数据
      * @param state
      */
-    this.getDetail = state =>
-      this.schema.getEntity(this.entities.getState(state), this.getId(state));
+    this.getDetail = state => this.schema.getEntity(state, this.getId(state));
   }
 
   *initiate(action) {
