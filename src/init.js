@@ -9,7 +9,7 @@ if (process.env.NODE_ENV !== 'production') {
   const { composeWithDevTools } = require('redux-devtools-extension');
   composeEnhancers = composeWithDevTools;
 }
-const entities = new Entities();
+const entities = Entities.instance;
 const combineDeepReducers = reducersMap => {
   const result = {};
   const reducerMapKeys = Object.keys(reducersMap);
@@ -149,7 +149,5 @@ const init = config => {
     },
   };
 };
-
-export { entities };
 
 export default init;

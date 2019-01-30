@@ -39,4 +39,6 @@ class Entities extends Model {
   }
 }
 
+Entities.instance = new Entities();
+
 export default Entities;
