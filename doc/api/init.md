@@ -4,15 +4,16 @@
 
 ## Arguments
 
-1. `options`（Object）：配置对象
+1. `options` _(Object)_：配置对象
 
-    - `reducers`（Object）：redux 的 reducer 对象结合，类似与 redux/compose 的接受参数
-    - `preloadedState`（Object|Array）：初始化状态
-    - `middlewares`（Array）：中间件
-    - `enhancers`（Array）：增强器
-    - `effect`（Function）：副作用哈哈苏
-    - `models`（Array）：Model 实例
-    - `entities`（Object）：Entities 实例
+    - `reducers` _(Object)_：redux 的 reducer 对象结合，类似与 redux/compose 的接受参数，非必填
+    - `preloadedState`（Object|Array）：初始化状态，非必填
+    - `middlewares`（Array）：中间件， 非必填
+    - `enhancers`（Array）：增强器， 非必填
+    - `effect`（Function）：副作用函数，非必填
+    - `models`（Array）：Model 实例，非必填
+    - `entities` _(Object)_：定制的 Entities 实例，非必填
+    - `devtool` _(Object)_：开发工具配置，非必填，参考 [redux-devtools-extension](https://github.com/zalmoxisus/redux-devtools-extension/blob/master/docs/API/Arguments.md#options)
 
 ## Returns
 

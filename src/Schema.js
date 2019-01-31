@@ -1,4 +1,5 @@
 import { normalize, schema } from 'normalizr';
+import Entities from './Entities';
 
 class Schema {
   /**
@@ -6,7 +7,7 @@ class Schema {
    */
   constructor(key, definition, { entities, ...options } = {}) {
     this.entity = new schema.Entity(key, definition || {}, options);
-    this.entities = entities;
+    this.entities = entities || Entities.getInstance();
   }
 
   getKey = () => this.entity.key;

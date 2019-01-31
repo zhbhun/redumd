@@ -1,4 +1,5 @@
 import { call, cancel, cancelled, put, select } from 'redux-saga/effects';
+import Entities from './Entities';
 import Page from './Page';
 
 class ListPage extends Page {
@@ -119,7 +120,7 @@ class ListPage extends Page {
 
     // options
     this.api = api;
-    this.entities = entities;
+    this.entities = entities || Entities.getInstance();
     this.schema = schema;
 
     // selectors

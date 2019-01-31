@@ -4,12 +4,16 @@ import createSagaMiddleware from 'redux-saga';
 import { all, call } from 'redux-saga/effects';
 import Entities from './Entities';
 
-let composeEnhancers = compose;
-if (process.env.NODE_ENV !== 'production') {
-  const { composeWithDevTools } = require('redux-devtools-extension');
-  composeEnhancers = composeWithDevTools;
-}
-const entities = new Entities();
+const getComposeEnhancers = devtool => {
+  if (process.env.NODE_ENV !== 'production') {
+    if (typeof window !== 'undefined') {
+      const { composeWithDevTools } = require('redux-devtools-extension');
+      return composeWithDevTools(devtool || {});
+    }
+  }
+  return compose;
+};
+
 const combineDeepReducers = reducersMap => {
   const result = {};
   const reducerMapKeys = Object.keys(reducersMap);
@@ -26,18 +30,26 @@ const combineDeepReducers = reducersMap => {
 };
 
 /**
- * @param {object} config
- * @param {object} config.reducers
- * @param {object|array} config.preloadedState
- * @param {array} config.middlewares
- * @param {array} config.enhancers
- * @param {function} config.effect
- * @param {array} config.models
- * @param {object} config.entities
+ * @param {Object} config
+ * @param {Object} config.reducers
+ * @param {Object|Array} config.preloadedState
+ * @param {Array} config.middlewares
+ * @param {Array} config.enhancers
+ * @param {Function} config.effect
+ * @param {Array} config.models
+ * @param {Object} config.entities
+ * @param {Object} config.devtool
  */
 const init = config => {
+  // config
+  if (config.entities) {
+    Entities.setInstance(config.entities);
+  }
   // model
-  const models = [...(config.models || []), config.entities || entities];
+  const models = [
+    ...(config.models || []),
+    config.entities || Entities.getInstance(),
+  ];
   const modelsMap = {};
   models.forEach(model => {
     modelsMap[model.namespace] = model;
@@ -79,6 +91,7 @@ const init = config => {
   const middlewares = [sagaMiddleware, ...(config.middlewares || [])];
 
   // store
+  const composeEnhancers = getComposeEnhancers(config.devtool);
   const store = createStore(
     mergeReducers(),
     config.preloadedState,
@@ -103,27 +116,48 @@ const init = config => {
   return {
     ...store,
     /**
-     * @param {array} models
+     * @param {array|string} models 如果为字符串则返回对应的 model 实例，否则必须是对象且合并到现有的 model 集合中
      */
     model(newModels) {
       if (typeof newModels === 'string') {
         return modelsMap[newModels];
       }
+      let hasChange = false;
       const newModelsArray = Array.isArray(newModels) ? newModels : [newModels];
       newModelsArray.forEach(item => {
-        if (!modelsMap[item.namespace]) {
+        const preModel = modelsMap[item.namespace];
+        if (
+          !preModel ||
+          // 热加载时 Model 类可能会发生变化
+          Object.getPrototypeOf(preModel).constructor !==
+            Object.getPrototypeOf(item).constructor
+        ) {
+          hasChange = true;
           models.push(item);
           modelsMap[item.namespace] = item;
           sagaMiddleware.run(item.effect);
         }
       });
-      store.replaceReducer(mergeReducers());
+      if (hasChange) {
+        store.replaceReducer(mergeReducers());
+      }
       return newModels;
     },
+    /**
+     * @param {Object|Array.<Object>} rmModels
+     */
     unmodel(rmModels) {
+      let hasChange = false;
       const rmModelsArray = Array.isArray(rmModels) ? rmModels : [rmModels];
       rmModelsArray.forEach(item => {
-        if (modelsMap[item.namespace]) {
+        const curModel = modelsMap[item.namespace];
+        if (
+          curModel &&
+          // 热加载时会更新路由页面，避免错误卸载了最新路由页面组件的 Model 配置
+          Object.getPrototypeOf(curModel).constructor ===
+            Object.getPrototypeOf(item).constructor
+        ) {
+          hasChange = true;
           const index = models.indexOf(item);
           store.dispatch(item.actions.destroy());
           models.splice(index, 1);
@@ -131,11 +165,11 @@ const init = config => {
           delete modelsMap[item.namespace];
         }
       });
-      store.replaceReducer(mergeReducers());
+      if (hasChange) {
+        store.replaceReducer(mergeReducers());
+      }
     },
   };
 };
-
-export { entities };
 
 export default init;

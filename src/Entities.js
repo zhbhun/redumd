@@ -1,5 +1,6 @@
 import mergeWith from 'lodash.mergewith';
 import Model from './Model';
+import Schema from './Schema';
 
 const mergeCustomizer = (objValue, srcValue, key, object, source, stack) => {
   if (Array.isArray(objValue)) {
@@ -8,8 +9,18 @@ const mergeCustomizer = (objValue, srcValue, key, object, source, stack) => {
   return undefined;
 };
 const merge = (...args) => mergeWith(...args, mergeCustomizer);
-function update(state, { payload: { entities } }) {
-  return merge({}, state, entities);
+function update(state, { payload, meta }) {
+  if (payload) {
+    if (meta && meta instanceof Schema) {
+      const { entities } = meta.create(payload);
+      return merge({}, state, entities);
+    }
+    if (payload.entities) {
+      const { entities } = payload;
+      return merge({}, state, entities);
+    }
+  }
+  return state;
 }
 
 class Entities extends Model {
@@ -27,5 +38,11 @@ class Entities extends Model {
     this.getEntities = (state, schema) => this.getState(state)[schema.getKey()];
   }
 }
+
+let defaultInstance = new Entities();
+Entities.getInstance = () => defaultInstance;
+Entities.setInstance = instance => {
+  defaultInstance = instance;
+};
 
 export default Entities;
