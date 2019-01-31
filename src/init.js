@@ -4,13 +4,16 @@ import createSagaMiddleware from 'redux-saga';
 import { all, call } from 'redux-saga/effects';
 import Entities from './Entities';
 
-let composeEnhancers = compose;
-if (process.env.NODE_ENV !== 'production') {
-  if (typeof window !== 'undefined') {
-    const { composeWithDevTools } = require('redux-devtools-extension');
-    composeEnhancers = composeWithDevTools;
+const getComposeEnhancers = devtool => {
+  if (process.env.NODE_ENV !== 'production') {
+    if (typeof window !== 'undefined') {
+      const { composeWithDevTools } = require('redux-devtools-extension');
+      return composeWithDevTools(devtool || {});
+    }
   }
-}
+  return compose;
+};
+
 const combineDeepReducers = reducersMap => {
   const result = {};
   const reducerMapKeys = Object.keys(reducersMap);
@@ -27,14 +30,15 @@ const combineDeepReducers = reducersMap => {
 };
 
 /**
- * @param {object} config
- * @param {object} config.reducers
- * @param {object|array} config.preloadedState
- * @param {array} config.middlewares
- * @param {array} config.enhancers
- * @param {function} config.effect
- * @param {array} config.models
- * @param {object} config.entities
+ * @param {Object} config
+ * @param {Object} config.reducers
+ * @param {Object|Array} config.preloadedState
+ * @param {Array} config.middlewares
+ * @param {Array} config.enhancers
+ * @param {Function} config.effect
+ * @param {Array} config.models
+ * @param {Object} config.entities
+ * @param {Object} config.devtool
  */
 const init = config => {
   // config
@@ -87,6 +91,7 @@ const init = config => {
   const middlewares = [sagaMiddleware, ...(config.middlewares || [])];
 
   // store
+  const composeEnhancers = getComposeEnhancers(config.devtool);
   const store = createStore(
     mergeReducers(),
     config.preloadedState,
