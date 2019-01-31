@@ -21,6 +21,7 @@ class DetailPage extends Page {
       message: null, // 初始化信息
       loading: false, // 初始化加载中
     },
+    extras: null, // 额外数据
   };
 
   static reducers = {
@@ -48,7 +49,7 @@ class DetailPage extends Page {
         },
       };
     },
-    initiateSuccess(state) {
+    initiateSuccess(state, { payload: extras }) {
       return {
         ...state,
         initiate: {
@@ -56,6 +57,7 @@ class DetailPage extends Page {
           message: null,
           loading: false,
         },
+        extras,
       };
     },
   };
@@ -78,17 +80,17 @@ class DetailPage extends Page {
     // selectors
     /**
      * 获取业务 ID
-     * @param state
+     * @param {Object} state
      */
     this.getId = state => this.getState(state).id;
     /**
      * 获取初始化状态
-     * @param state
+     * @param {Object} state
      */
     this.getInitiate = state => this.getState(state).initiate;
     /**
      * 是否初始化
-     * @param state
+     * @param {Object} state
      */
     this.isInitiated = state => {
       const data = this.getDetail(state);
@@ -96,9 +98,14 @@ class DetailPage extends Page {
     };
     /**
      * 获取业务详情数据
-     * @param state
+     * @param {Object} state
      */
     this.getDetail = state => this.schema.getEntity(state, this.getId(state));
+    /**
+     * 获取额外数据
+     * @param {Object} state
+     */
+    this.getExtras = state => this.getState(state).extras;
   }
 
   *initiate(action) {
@@ -116,9 +123,13 @@ class DetailPage extends Page {
       }
       // 加载数据
       yield put(this.actions.initiateRequest(action.payload));
-      const { data } = yield call(this.api, action.payload, action.meta);
+      const { data, extras } = yield call(
+        this.api,
+        action.payload,
+        action.meta
+      );
       yield put(this.entities.actions.append(data, this.schema));
-      yield put(this.actions.initiateSuccess());
+      yield put(this.actions.initiateSuccess(extras || null));
     } catch (err) {
       yield put(this.actions.initiateFailure(err));
     }
