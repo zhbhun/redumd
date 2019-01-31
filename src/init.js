@@ -138,11 +138,20 @@ const init = config => {
       }
       return newModels;
     },
+    /**
+     * @param {Object|Array.<Object>} rmModels
+     */
     unmodel(rmModels) {
       let hasChange = false;
       const rmModelsArray = Array.isArray(rmModels) ? rmModels : [rmModels];
       rmModelsArray.forEach(item => {
-        if (modelsMap[item.namespace]) {
+        const curModel = modelsMap[item.namespace];
+        if (
+          curModel &&
+          // 热加载时会更新路由页面，避免错误卸载了最新路由页面组件的 Model 配置
+          Object.getPrototypeOf(curModel).constructor ===
+            Object.getPrototypeOf(item).constructor
+        ) {
           hasChange = true;
           const index = models.indexOf(item);
           store.dispatch(item.actions.destroy());
