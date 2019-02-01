@@ -20,6 +20,12 @@ class NormalPage extends Page {
         invalidate: true,
       };
     },
+    updateDataSuccess(state, { payload: data }) {
+      return {
+        ...state,
+        data,
+      };
+    },
     initiateRequest(state, { payload: params }) {
       return {
         ...state,
@@ -41,7 +47,7 @@ class NormalPage extends Page {
         },
       };
     },
-    initiateSuccess(state, { payload: data }) {
+    initiateSuccess(state) {
       return {
         ...state,
         invalidate: false,
@@ -50,7 +56,6 @@ class NormalPage extends Page {
           message: null,
           loading: false,
         },
-        data,
       };
     },
   };
@@ -74,6 +79,12 @@ class NormalPage extends Page {
     this.isInitiated = state => !!this.getData(state);
   }
 
+  *updateData({ payload: data }) {
+    if (data !== undefined) {
+      yield put(this.actions.updateDataSuccess(data));
+    }
+  }
+
   *initiate(action) {
     try {
       const { loading } = yield select(this.getInitiate);
@@ -82,7 +93,8 @@ class NormalPage extends Page {
       }
       yield put(this.actions.initiateRequest(action.payload));
       const { data } = yield call(this.api, action.payload, action.meta);
-      yield put(this.actions.initiateSuccess(data));
+      yield put(this.actions.updateData(data));
+      yield put(this.actions.initiateSuccess());
     } catch (err) {
       yield put(this.actions.initiateFailure(err));
     }

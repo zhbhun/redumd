@@ -31,6 +31,12 @@ class ListPage extends Page {
         invalidate: true,
       };
     },
+    updateExtrasSuccess(state, { payload: extras }) {
+      return {
+        ...state,
+        extras,
+      };
+    },
     initiateRequest(state, { payload: params }) {
       return {
         ...state,
@@ -52,12 +58,7 @@ class ListPage extends Page {
         },
       };
     },
-    initiateSuccess(
-      state,
-      {
-        payload: { meta, data, extras },
-      }
-    ) {
+    initiateSuccess(state, { payload: data, meta }) {
       return {
         ...state,
         invalidate: false,
@@ -71,7 +72,6 @@ class ListPage extends Page {
           ...meta,
         },
         data,
-        extras,
       };
     },
     loadMoreRequest(state) {
@@ -147,6 +147,12 @@ class ListPage extends Page {
     };
   }
 
+  *updateExtras({ payload: extras }) {
+    if (extras !== undefined) {
+      yield put(this.actions.updateExtrasSuccess(extras));
+    }
+  }
+
   *initiate(action) {
     try {
       const { loading } = yield select(this.getInitiate);
@@ -166,12 +172,11 @@ class ListPage extends Page {
       );
       const entities = this.schema.create(data);
       yield put(this.entities.actions.append(entities));
+      if (extras !== undefined) {
+        yield call(this.updateExtras, { payload: extras });
+      }
       yield put(
-        this.actions.initiateSuccess({
-          meta,
-          data: this.schema.getResult(entities),
-          extras,
-        })
+        this.actions.initiateSuccess(this.schema.getResult(entities), meta)
       );
     } catch (err) {
       yield put(this.actions.initiateFailure(err));

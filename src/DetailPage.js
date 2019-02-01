@@ -35,6 +35,12 @@ class DetailPage extends Page {
         invalidate: true,
       };
     },
+    updateExtrasSuccess(state, { payload: extras }) {
+      return {
+        ...state,
+        extras,
+      };
+    },
     initiateRequest(state, { payload }) {
       return {
         ...state,
@@ -56,7 +62,7 @@ class DetailPage extends Page {
         },
       };
     },
-    initiateSuccess(state, { payload: extras }) {
+    initiateSuccess(state) {
       return {
         ...state,
         invalidate: false,
@@ -65,7 +71,6 @@ class DetailPage extends Page {
           message: null,
           loading: false,
         },
-        extras,
       };
     },
   };
@@ -120,6 +125,12 @@ class DetailPage extends Page {
     this.getExtras = state => this.getState(state).extras;
   }
 
+  *updateExtras({ payload: extras }) {
+    if (extras !== undefined) {
+      yield put(this.actions.updateExtrasSuccess(extras));
+    }
+  }
+
   *initiate(action) {
     try {
       // 根据 ID 是否变化来重置状态
@@ -141,7 +152,10 @@ class DetailPage extends Page {
         action.meta
       );
       yield put(this.entities.actions.append(data, this.schema));
-      yield put(this.actions.initiateSuccess(extras || null));
+      if (extras !== undefined) {
+        yield call(this.updateExtras, { payload: extras });
+      }
+      yield put(this.actions.initiateSuccess());
     } catch (err) {
       yield put(this.actions.initiateFailure(err));
     }
