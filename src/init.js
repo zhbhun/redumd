@@ -8,7 +8,22 @@ const getComposeEnhancers = devtool => {
   if (process.env.NODE_ENV !== 'production') {
     if (typeof window !== 'undefined') {
       const { composeWithDevTools } = require('redux-devtools-extension');
-      return composeWithDevTools(devtool || {});
+      return composeWithDevTools(
+        devtool || {
+          shouldHotReload: false,
+          features: {
+            pause: false,
+            lock: false,
+            persist: false,
+            export: false,
+            jump: false,
+            skip: false,
+            reorder: false,
+            dispatch: false,
+            test: false,
+          },
+        }
+      );
     }
   }
   return compose;
