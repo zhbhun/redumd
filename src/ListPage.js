@@ -31,7 +31,7 @@ class ListPage extends Page {
         invalidate: true,
       };
     },
-    updateExtrasSuccess(state, { payload: extras }) {
+    initiateExtrasSuccess(state, { payload: extras }) {
       return {
         ...state,
         extras,
@@ -147,9 +147,9 @@ class ListPage extends Page {
     };
   }
 
-  *updateExtras({ payload: extras }) {
+  *initiateExtras({ payload: extras }) {
     if (extras !== undefined) {
-      yield put(this.actions.updateExtrasSuccess(extras));
+      yield put(this.actions.initiateExtrasSuccess(extras));
     }
   }
 
@@ -173,7 +173,7 @@ class ListPage extends Page {
       const entities = this.schema.create(data);
       yield put(this.entities.actions.append(entities));
       if (extras !== undefined) {
-        yield call(this.updateExtras, { payload: extras });
+        yield call(this.initiateExtras, { payload: extras });
       }
       yield put(
         this.actions.initiateSuccess(this.schema.getResult(entities), meta)

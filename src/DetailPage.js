@@ -35,7 +35,7 @@ class DetailPage extends Page {
         invalidate: true,
       };
     },
-    updateExtrasSuccess(state, { payload: extras }) {
+    initiateExtrasSuccess(state, { payload: extras }) {
       return {
         ...state,
         extras,
@@ -125,9 +125,9 @@ class DetailPage extends Page {
     this.getExtras = state => this.getState(state).extras;
   }
 
-  *updateExtras({ payload: extras }) {
+  *initiateExtras({ payload: extras }) {
     if (extras !== undefined) {
-      yield put(this.actions.updateExtrasSuccess(extras));
+      yield put(this.actions.initiateExtrasSuccess(extras));
     }
   }
 
@@ -153,7 +153,7 @@ class DetailPage extends Page {
       );
       yield put(this.entities.actions.append(data, this.schema));
       if (extras !== undefined) {
-        yield call(this.updateExtras, { payload: extras });
+        yield call(this.initiateExtras, { payload: extras });
       }
       yield put(this.actions.initiateSuccess());
     } catch (err) {
