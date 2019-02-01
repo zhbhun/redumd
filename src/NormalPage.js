@@ -4,6 +4,7 @@ import Page from './Page';
 class NormalPage extends Page {
   static defaultState = {
     params: null, // 查询参数
+    invalidate: true, // 缓存数据是否有效
     initiate: {
       error: null, // 初始化错误
       message: null, // 初始化信息
@@ -13,6 +14,12 @@ class NormalPage extends Page {
   };
 
   static reducers = {
+    invalidate(state) {
+      return {
+        ...state,
+        invalidate: true,
+      };
+    },
     initiateRequest(state, { payload: params }) {
       return {
         ...state,
@@ -37,6 +44,7 @@ class NormalPage extends Page {
     initiateSuccess(state, { payload: data }) {
       return {
         ...state,
+        invalidate: false,
         initiate: {
           error: null,
           message: null,
@@ -59,6 +67,7 @@ class NormalPage extends Page {
     this.api = api;
 
     // selectors
+    this.isInvalidate = state => this.getState(state).invalidate;
     this.getParams = state => this.getState(state).params;
     this.getInitiate = state => this.getState(state).initiate;
     this.getData = state => this.getState(state).data;
@@ -80,8 +89,8 @@ class NormalPage extends Page {
   }
 
   *initiateIfNeed(action) {
-    const isInitiated = yield select(this.isInitiated);
-    if (!isInitiated) {
+    const isInvalidate = yield select(this.isInvalidate);
+    if (isInvalidate) {
       yield put(this.actions.initiate(action.payload, action.meta));
     }
   }

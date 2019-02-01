@@ -16,6 +16,7 @@ class DetailPage extends Page {
    */
   static defaultState = {
     id: null, // 业务 ID
+    invalidate: true, // 缓存数据是否有效
     initiate: {
       error: null, // 初始化错误
       message: null, // 初始化信息
@@ -27,6 +28,12 @@ class DetailPage extends Page {
   static reducers = {
     reset(state, { payload }) {
       return payload;
+    },
+    invalidate(state) {
+      return {
+        ...state,
+        invalidate: true,
+      };
     },
     initiateRequest(state, { payload }) {
       return {
@@ -52,6 +59,7 @@ class DetailPage extends Page {
     initiateSuccess(state, { payload: extras }) {
       return {
         ...state,
+        invalidate: false,
         initiate: {
           error: null,
           message: null,
@@ -78,6 +86,10 @@ class DetailPage extends Page {
     this.schema = schema;
 
     // selectors
+    /**
+     * 缓存数据是否无效
+     */
+    this.isInvalidate = state => this.getState(state).invalidate;
     /**
      * 获取业务 ID
      * @param {Object} state
@@ -142,9 +154,8 @@ class DetailPage extends Page {
       yield put(this.actions.cancel('initiateIfNeed'));
       yield put(this.actions.reset(this.defaultState));
     }
-    // 避免重复加载
-    const isInitiated = yield select(this.isInitiated);
-    if (!isInitiated) {
+    const isInvalidate = yield select(this.isInvalidate);
+    if (isInvalidate) {
       yield put(this.actions.initiate(action.payload, action.meta));
     }
   }
