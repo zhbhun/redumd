@@ -5,6 +5,7 @@ import Page from './Page';
 class ListPage extends Page {
   static defaultState = {
     params: null, // 查询参数
+    invalidate: true, // 缓存数据是否有效
     initiate: {
       error: null, // 初始化错误
       message: null, // 初始化信息
@@ -24,6 +25,18 @@ class ListPage extends Page {
   };
 
   static reducers = {
+    invalidate(state) {
+      return {
+        ...state,
+        invalidate: true,
+      };
+    },
+    initiateExtrasSuccess(state, { payload: extras }) {
+      return {
+        ...state,
+        extras,
+      };
+    },
     initiateRequest(state, { payload: params }) {
       return {
         ...state,
@@ -45,14 +58,10 @@ class ListPage extends Page {
         },
       };
     },
-    initiateSuccess(
-      state,
-      {
-        payload: { meta, data, extras },
-      }
-    ) {
+    initiateSuccess(state, { payload: data, meta }) {
       return {
         ...state,
+        invalidate: false,
         initiate: {
           error: null,
           message: null,
@@ -63,7 +72,6 @@ class ListPage extends Page {
           ...meta,
         },
         data,
-        extras,
       };
     },
     loadMoreRequest(state) {
@@ -124,6 +132,7 @@ class ListPage extends Page {
     this.schema = schema;
 
     // selectors
+    this.isInvalidate = state => this.getState(state).invalidate;
     this.getParams = state => this.getState(state).params;
     this.getMeta = state => this.getState(state).meta;
     this.getPage = state => this.getMeta(state).page;
@@ -136,6 +145,12 @@ class ListPage extends Page {
       const data = this.getState(state).data;
       return !!data && data.length > 0;
     };
+  }
+
+  *initiateExtras({ payload: extras }) {
+    if (extras !== undefined) {
+      yield put(this.actions.initiateExtrasSuccess(extras));
+    }
   }
 
   *initiate(action) {
@@ -157,12 +172,11 @@ class ListPage extends Page {
       );
       const entities = this.schema.create(data);
       yield put(this.entities.actions.append(entities));
+      if (extras !== undefined) {
+        yield call(this.initiateExtras, { payload: extras });
+      }
       yield put(
-        this.actions.initiateSuccess({
-          meta,
-          data: this.schema.getResult(entities),
-          extras,
-        })
+        this.actions.initiateSuccess(this.schema.getResult(entities), meta)
       );
     } catch (err) {
       yield put(this.actions.initiateFailure(err));
@@ -170,8 +184,8 @@ class ListPage extends Page {
   }
 
   *initiateIfNeed(action) {
-    const isInitiated = yield select(this.isInitiated);
-    if (!isInitiated) {
+    const isInvalidate = yield select(this.isInvalidate);
+    if (isInvalidate) {
       yield put(this.actions.initiate(action.payload, action.meta));
     }
   }
