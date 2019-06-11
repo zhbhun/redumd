@@ -93,6 +93,7 @@ class Model {
         }
       }
     });
+    reducers[makeType(namespace, 'destroy')] = () => this.defaultState;
 
     this.defaultState = defaultState; // 默认状态
     // 副作用函数
