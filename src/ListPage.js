@@ -49,6 +49,10 @@ class ListPage extends Page {
       };
     },
     initiateFailure(state, { payload: error }) {
+      if (process.env.NODE_ENV === 'development') {
+        // eslint-disable-next-line
+        console.log(error);
+      }
       return {
         ...state,
         initiate: {
@@ -85,6 +89,10 @@ class ListPage extends Page {
       };
     },
     loadMoreFailure(state, { payload: error }) {
+      if (process.env.NODE_ENV === 'development') {
+        // eslint-disable-next-line
+        console.log(error);
+      }
       return {
         ...state,
         loadMore: {
