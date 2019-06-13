@@ -173,11 +173,13 @@ const init = config => {
             Object.getPrototypeOf(item).constructor
         ) {
           hasChange = true;
-          const index = models.indexOf(item);
-          store.dispatch(item.actions.destroy());
-          models.splice(index, 1);
-          modelsMap[item.namespace] = undefined;
-          delete modelsMap[item.namespace];
+          const index = models.indexOf(curModel);
+          if (index >= 0) {
+            store.dispatch(curModel.actions.destroy());
+            models.splice(index, 1);
+            modelsMap[curModel.namespace] = undefined;
+            delete modelsMap[curModel.namespace];
+          }
         }
       });
       if (hasChange) {
