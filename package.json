@@ -91,7 +91,7 @@
       [
         "@babel/plugin-proposal-class-properties",
         {
-          "loose": false
+          "loose": true
         }
       ],
       "@babel/plugin-proposal-json-strings",
