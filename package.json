@@ -47,27 +47,26 @@
     "redux": "^4.0.0"
   },
   "dependencies": {
-    "@babel/runtime-corejs2": "^7.0.0",
     "lodash.mergewith": "^4.0.0",
     "normalizr": "^3.0.0",
     "redux-devtools-extension": "^2.0.0",
     "redux-saga": "^0.16.0"
   },
   "devDependencies": {
-    "@babel/cli": "^7.1.2",
-    "@babel/core": "^7.1.2",
-    "@babel/plugin-proposal-class-properties": "^7.1.0",
-    "@babel/plugin-proposal-decorators": "^7.1.2",
-    "@babel/plugin-proposal-function-sent": "^7.1.0",
-    "@babel/plugin-proposal-json-strings": "^7.0.0",
-    "@babel/plugin-proposal-numeric-separator": "^7.0.0",
-    "@babel/plugin-proposal-throw-expressions": "^7.0.0",
-    "@babel/plugin-transform-runtime": "^7.1.0",
-    "@babel/preset-env": "^7.1.0",
+    "@babel/cli": "^7.8.4",
+    "@babel/core": "^7.9.6",
+    "@babel/plugin-proposal-class-properties": "^7.8.3",
+    "@babel/plugin-proposal-decorators": "^7.8.3",
+    "@babel/plugin-proposal-function-sent": "^7.8.3",
+    "@babel/plugin-proposal-json-strings": "^7.8.3",
+    "@babel/plugin-proposal-numeric-separator": "^7.8.3",
+    "@babel/plugin-proposal-throw-expressions": "^7.8.3",
+    "@babel/plugin-transform-runtime": "^7.9.6",
+    "@babel/preset-env": "^7.9.6",
     "eslint-config-ease-base": "^2.0.0",
     "lint-staged": "^7.3.0",
     "prettier-config-ease": "^2.0.0",
-    "rimraf": "^2.6.2"
+    "rimraf": "^2.7.1"
   },
   "babel": {
     "presets": [
@@ -75,16 +74,12 @@
         "@babel/preset-env",
         {
           "targets": {
-            "browsers": [
-              "iOS >= 7",
-              "Android >= 4.2",
-              "last 2 QQAndroid versions"
-            ]
+            "node": 10,
+            "esmodules": true
           },
-          "spec": false,
-          "loose": false,
           "modules": "commonjs",
-          "useBuiltIns": "usage"
+          "useBuiltIns": "usage",
+          "corejs": 3
         }
       ]
     ],
@@ -108,7 +103,7 @@
       [
         "@babel/plugin-transform-runtime",
         {
-          "corejs": 2,
+          "corejs": false,
           "helpers": true,
           "regenerator": true,
           "useESModules": false
