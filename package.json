@@ -73,13 +73,8 @@
       [
         "@babel/preset-env",
         {
-          "targets": {
-            "node": 10,
-            "esmodules": true
-          },
-          "modules": "commonjs",
-          "useBuiltIns": "usage",
-          "corejs": 3
+          "loose": true,
+          "modules": "commonjs"
         }
       ]
     ],
