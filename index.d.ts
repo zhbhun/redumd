@@ -303,21 +303,22 @@ declare abstract class NormalPage<D = any> extends Page<NormalPageState<D>> {
 export { Schema, Model, Entities, Page, ListPage, DetailPage, NormalPage };
 
 export interface InitOptions {
-  reducers: any;
-  preloadedState: any;
-  middlewares: any;
-  enhancers: any;
-  effect: Function;
-  models: any;
-  entities: Entities;
-  devtool: any;
+  reducers?: any;
+  preloadedState?: any;
+  middlewares?: any;
+  enhancers?: any;
+  effect?: Function;
+  models?: any;
+  entities?: Entities;
+  devtool?: any;
 }
 
 export interface App extends Store {
   model: (models: any) => void;
   unmode: (models: any) => void;
   runSagaTask: () => null;
-  s;
 }
 
-export type init = (options: InitOptions) => App;
+declare const init = (options: InitOptions) => App;
+
+export { init };
