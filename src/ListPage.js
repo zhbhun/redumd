@@ -17,7 +17,7 @@ class ListPage extends Page {
       loading: false, // 分页加载中
     },
     meta: {
-      page: 1, // 分页
+      page: 0, // 当前分页，默认为 0，表示还没有开始加载
       hasMore: false, // 是否有更多数据
     },
     data: null, // 分页数据
@@ -102,6 +102,16 @@ class ListPage extends Page {
         },
       };
     },
+    loadMoreCancel(state) {
+      return {
+        ...state,
+        loadMore: {
+          error: null,
+          message: null,
+          loading: false,
+        },
+      };
+    },
     loadMoreSuccess(
       state,
       {
@@ -130,14 +140,16 @@ class ListPage extends Page {
    * @param {function} options.api API 接口，用于请求列表数据
    * @param {Object} options.entities Entities 实例，用于存储对应的业务状态
    * @param {Object} options.schema Schema 实例，用于查询对应的业务状态
+   * @param {Object} options.nextpage 获取下一页的页码的方法，参数是上一页的页码，如果还没有请求过，那么页面为 0
    */
-  constructor(namespace, { api, entities, schema }) {
+  constructor(namespace, { api, entities, schema, ...options }) {
     super(namespace);
 
     // options
     this.api = api;
     this.entities = entities || Entities.getInstance();
     this.schema = schema;
+    this.nextpage = options.nextpage || (page => page + 1);
 
     // selectors
     this.isInvalidate = state => this.getState(state).invalidate;
@@ -174,7 +186,7 @@ class ListPage extends Page {
       yield put(this.actions.initiateRequest(action.payload));
       const { data, meta, extras } = yield call(
         this.api,
-        1,
+        this.nextpage(0),
         action.payload,
         action.meta
       );
@@ -215,18 +227,24 @@ class ListPage extends Page {
       const params = yield select(this.getParams);
       yield put(this.actions.loadMoreRequest());
       const page = yield select(this.getPage);
-      const { data, meta } = yield call(this.api, page + 1, params);
-      const entities = this.schema.create(data);
-      yield put(this.entities.actions.append(entities));
-      yield put(
-        this.actions.loadMoreSuccess({
-          meta: {
-            ...meta,
-            page: meta.page || page + 1,
-          },
-          data: this.schema.getResult(entities),
-        })
-      );
+      const nextPage = this.nextpage(page);
+      const { data, meta } = yield call(this.api, nextPage, params);
+      const currPage = yield select(this.getPage);
+      if (page === currPage) {
+        const entities = this.schema.create(data);
+        yield put(this.entities.actions.append(entities));
+        yield put(
+          this.actions.loadMoreSuccess({
+            meta: {
+              ...meta,
+              page: meta.page || nextPage,
+            },
+            data: this.schema.getResult(entities),
+          })
+        );
+      } else {
+        yield put(this.actions.loadMoreCancel());
+      }
     } catch (err) {
       yield put(this.actions.loadMoreFailure(err));
     } finally {

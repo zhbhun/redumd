@@ -158,6 +158,7 @@ export interface ListPageOptions {
   api: Function;
   entities?: any;
   schema: any;
+  nextpage?: (page: any) => any;
 }
 
 declare abstract class ListPage<E = any> extends Page<ListPageState<E>> {
@@ -300,8 +301,6 @@ declare abstract class NormalPage<D = any> extends Page<NormalPageState<D>> {
   protected refresh: ModelEffect;
 }
 
-export { Schema, Model, Entities, Page, ListPage, DetailPage, NormalPage };
-
 export interface InitOptions {
   reducers?: any;
   preloadedState?: any;
@@ -321,4 +320,13 @@ export interface App extends Store {
 
 declare const init = (options: InitOptions) => App;
 
-export { init };
+export {
+  init,
+  Schema,
+  Model,
+  Entities,
+  Page,
+  ListPage,
+  DetailPage,
+  NormalPage
+};
