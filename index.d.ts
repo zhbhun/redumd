@@ -10,7 +10,10 @@ export interface ModelAction<P, M> extends Action {
   meta?: M;
 }
 
-export type ModelActionCreator<P = any, M = any> = (payload?: P, meta?: M) => ModelAction<P, M>;
+export type ModelActionCreator<P = any, M = any> = (
+  payload?: P,
+  meta?: M
+) => ModelAction<P, M>;
 
 export type ModelReducer<S = any, P = any, M = any> = Reducer<
   S,
@@ -68,7 +71,9 @@ declare abstract class Model<S> {
 
   namespace: string;
   types: { [key: string]: string };
-  actions: { [key: string]: <P, M>(payload: P, meta: M) => ModelAction<P, M> };
+  actions: {
+    [key: string]: <P = any, M = any>(payload: P, meta: M) => ModelAction<P, M>;
+  };
   tasks: { [key: string]: Effect };
   getState: (state: any) => S;
   // 内部使用
@@ -191,29 +196,29 @@ declare abstract class ListPage<E = any> extends Page<ListPageState<E>> {
 
   // types
   public types: {
-    invalidate: string,
+    invalidate: string;
     initiate: string;
     initiateIfNeed: string;
-    initiateRequest: string,
-    initiateFailure: string,
-    initiateSuccess: string,
+    initiateRequest: string;
+    initiateFailure: string;
+    initiateSuccess: string;
     initiateExtras: string;
-    initiateExtrasSuccess: string,
-    loadMore: string,
-    loadMoreRequest: string,
-    loadMoreFailure: string,
-    loadMoreCancel: string,
-    loadMoreSuccess: string,
-    refresh: string,
+    initiateExtrasSuccess: string;
+    loadMore: string;
+    loadMoreRequest: string;
+    loadMoreFailure: string;
+    loadMoreCancel: string;
+    loadMoreSuccess: string;
+    refresh: string;
   };
 
   // actions
   public actions: {
-    invalidate: ModelActionCreator,
-    initiateIfNeed: ModelActionCreator,
-    initiate: ModelActionCreator,
-    loadMore: ModelActionCreator,
-    refresh: ModelActionCreator,
+    invalidate: ModelActionCreator;
+    initiateIfNeed: ModelActionCreator;
+    initiate: ModelActionCreator;
+    loadMore: ModelActionCreator;
+    refresh: ModelActionCreator;
   };
 
   // selector
@@ -279,25 +284,25 @@ declare abstract class DetailPage<E = any> extends Page<DetailPageState<E>> {
 
   // types
   public types: {
-    reset: string,
-    invalidate: string,
+    reset: string;
+    invalidate: string;
     initiate: string;
     initiateIfNeed: string;
-    initiateRequest: string,
-    initiateFailure: string,
-    initiateSuccess: string,
+    initiateRequest: string;
+    initiateFailure: string;
+    initiateSuccess: string;
     initiateExtras: string;
-    initiateExtrasSuccess: string,
-    refresh: string,
+    initiateExtrasSuccess: string;
+    refresh: string;
   };
 
   // actions
   public actions: {
-    reset: ModelActionCreator,
-    invalidate: ModelActionCreator,
-    initiateIfNeed: ModelActionCreator,
-    initiate: ModelActionCreator,
-    refresh: ModelActionCreator,
+    reset: ModelActionCreator;
+    invalidate: ModelActionCreator;
+    initiateIfNeed: ModelActionCreator;
+    initiate: ModelActionCreator;
+    refresh: ModelActionCreator;
   };
 
   public isInvalidate: ModelSelector<boolean>;
@@ -353,24 +358,23 @@ declare abstract class NormalPage<D = any> extends Page<NormalPageState<D>> {
 
   // types
   public types: {
-    invalidate: string,
+    invalidate: string;
     initiate: string;
     initiateIfNeed: string;
-    initiateRequest: string,
-    initiateFailure: string,
-    initiateSuccess: string,
+    initiateRequest: string;
+    initiateFailure: string;
+    initiateSuccess: string;
     initiateData: string;
-    refresh: string,
+    refresh: string;
   };
 
   // actions
   public actions: {
-    invalidate: ModelActionCreator,
-    initiate: ModelActionCreator,
-    initiateIfNeed: ModelActionCreator,
-    refresh: ModelActionCreator,
+    invalidate: ModelActionCreator;
+    initiate: ModelActionCreator;
+    initiateIfNeed: ModelActionCreator;
+    refresh: ModelActionCreator;
   };
-
 
   public isInvalidate: ModelSelector<boolean>;
   public getParams: ModelSelector;
