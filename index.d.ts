@@ -72,7 +72,7 @@ declare abstract class Model<S> {
   namespace: string;
   types: { [key: string]: string };
   actions: {
-    [key: string]: <P = any, M = any>(payload: P, meta: M) => ModelAction<P, M>;
+    [key: string]: <P = any, M = any>(payload?: P, meta?: M) => ModelAction<P, M>;
   };
   tasks: { [key: string]: Effect };
   getState: (state: any) => S;
