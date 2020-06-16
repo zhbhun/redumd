@@ -334,7 +334,7 @@ export interface NormalPageState<D = any> {
   /**
    * 数据
    */
-  extras: D;
+  data: D;
 }
 
 export interface NormalPageOptions {
@@ -343,7 +343,7 @@ export interface NormalPageOptions {
 
 declare abstract class NormalPage<D = any> extends Page<NormalPageState<D>> {
   // state
-  public static state: NormalPageState<E>;
+  public static state: NormalPageState;
 
   public static reducers: {
     invalidate: ModelReducer<ListPageState>;
