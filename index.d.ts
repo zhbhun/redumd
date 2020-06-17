@@ -198,7 +198,7 @@ export interface ListPageActions {
 
 declare abstract class ListPage<
   E = any,
-  S extends ListPageState<E>
+  S extends ListPageState<E> = any
 > extends Page<S> {
   // state
   public static state: ListPageState;
@@ -296,7 +296,7 @@ export interface DetailPageActions {
 
 declare abstract class DetailPage<
   E = any,
-  S extends DetailPageState<E>
+  S extends DetailPageState<E> = any
 > extends Page<S> {
   // state
   public static state: DetailPageState;
@@ -378,7 +378,7 @@ export interface NormalPageActions {
 
 declare abstract class NormalPage<
   D = any,
-  S extends NormalPageState<D>
+  S extends NormalPageState<D> = any
 > extends Page<S> {
   // state
   public static state: NormalPageState;
