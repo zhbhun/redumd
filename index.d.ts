@@ -201,7 +201,7 @@ declare abstract class ListPage<
   S extends ListPageState<E> = any
 > extends Page<S> {
   // state
-  public static state: ListPageState;
+  public static defaultState: ListPageState;
 
   // reducers
   public static reducers: {
@@ -299,7 +299,7 @@ declare abstract class DetailPage<
   S extends DetailPageState<E> = any
 > extends Page<S> {
   // state
-  public static state: DetailPageState;
+  public static defaultState: DetailPageState;
 
   public static reducers: {
     reset: ModelReducer<ListPageState>;
@@ -381,7 +381,7 @@ declare abstract class NormalPage<
   S extends NormalPageState<D> = any
 > extends Page<S> {
   // state
-  public static state: NormalPageState;
+  public static defaultState: NormalPageState;
 
   public static reducers: {
     invalidate: ModelReducer<ListPageState>;
