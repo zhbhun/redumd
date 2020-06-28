@@ -65,6 +65,10 @@ declare class Schema<T> {
   create: (data: any) => any;
 }
 
+export interface ModelTypes {
+  [key: string]: string;
+}
+
 export interface ModelActions {
   [key: string]: ModelActionCreator;
 }
@@ -74,7 +78,7 @@ declare abstract class Model<S> {
   static reducers: ModelReducersMapObject;
 
   namespace: string;
-  types: { [key: string]: string };
+  types: ModelTypes;
   actions: ModelActions;
   tasks: { [key: string]: Effect };
   getState: (state: any) => S;
@@ -170,7 +174,7 @@ export interface ListPageOptions {
   nextpage?: (page: any) => any;
 }
 
-export interface ListPageTypes {
+export interface ListPageTypes extends ModelTypes {
   invalidate: string;
   initiate: string;
   initiateIfNeed: string;
@@ -272,7 +276,7 @@ export interface DetailPageOptions {
   schema: any;
 }
 
-export interface DetailPageTypes {
+export interface DetailPageTypes extends ModelTypes {
   reset: string;
   invalidate: string;
   initiate: string;
@@ -357,7 +361,7 @@ export interface NormalPageOptions {
   api: Function;
 }
 
-export interface NormalPageTypes {
+export interface NormalPageTypes extends ModelTypes {
   invalidate: string;
   initiate: string;
   initiateIfNeed: string;
