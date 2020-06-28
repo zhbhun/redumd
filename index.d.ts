@@ -6,8 +6,8 @@ import { Reducer, Action, ReducersMapObject, Store } from "redux";
 import { Effect } from "redux-saga";
 
 export interface ModelAction<P = any, M = any> extends Action {
-  payload?: P;
-  meta?: M;
+  payload: P;
+  meta: M;
 }
 
 export type ModelActionCreator<P = any, M = any> = (
@@ -65,18 +65,17 @@ declare class Schema<T> {
   create: (data: any) => any;
 }
 
+export interface ModelActions {
+  [key: string]: ModelActionCreator;
+}
+
 declare abstract class Model<S> {
   static namespace: string;
   static reducers: ModelReducersMapObject;
 
   namespace: string;
   types: { [key: string]: string };
-  actions: {
-    [key: string]: <P = any, M = any>(
-      payload?: P,
-      meta?: M
-    ) => ModelAction<P, M>;
-  };
+  actions: ModelActions;
   tasks: { [key: string]: Effect };
   getState: (state: any) => S;
   // 内部使用
@@ -188,7 +187,7 @@ export interface ListPageTypes {
   refresh: string;
 }
 
-export interface ListPageActions {
+export interface ListPageActions extends ModelActions {
   invalidate: ModelActionCreator;
   initiateIfNeed: ModelActionCreator;
   initiate: ModelActionCreator;
@@ -286,7 +285,7 @@ export interface DetailPageTypes {
   refresh: string;
 }
 
-export interface DetailPageActions {
+export interface DetailPageActions extends ModelActions {
   reset: ModelActionCreator;
   invalidate: ModelActionCreator;
   initiateIfNeed: ModelActionCreator;
@@ -369,7 +368,7 @@ export interface NormalPageTypes {
   refresh: string;
 }
 
-export interface NormalPageActions {
+export interface NormalPageActions extends ModelActions {
   invalidate: ModelActionCreator;
   initiate: ModelActionCreator;
   initiateIfNeed: ModelActionCreator;
@@ -429,6 +428,8 @@ export interface App extends Store {
   runSagaTask: () => null;
 }
 
+declare const entities: Entities;
+
 declare const init = (options: InitOptions) => App;
 
 export {
@@ -439,5 +440,6 @@ export {
   Page,
   ListPage,
   DetailPage,
-  NormalPage
+  NormalPage,
+  entities
 };
