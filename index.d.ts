@@ -2,7 +2,7 @@ import {
   Schema as NormalizrSchema,
   EntityOptions as NormalizrEntityOptions
 } from "normalizr";
-import { Reducer, Action, ReducersMapObject, Store } from "redux";
+import { Action, Store } from "redux";
 import { Effect } from "redux-saga";
 
 export interface ModelAction<P = any, M = any> extends Action {
@@ -15,16 +15,14 @@ export type ModelActionCreator<P = any, M = any> = (
   meta?: M
 ) => ModelAction<P, M>;
 
-export type ModelReducer<S = any, P = any, M = any> = Reducer<
-  S,
-  ModelAction<P, M>
->;
+export type ModelReducer<S = any, P = any, M = any> = (
+  state: S,
+  action: ModelAction<P, M>
+) => S
 
-export type ModelReducersMapObject<
-  S = any,
-  P = any,
-  M = any
-> = ReducersMapObject<S, ModelAction<P, M>>;
+export type ModelReducers<S = any, P = any, M = any> = {
+  [key: string]: ModelReducer<S, P, M>;
+};
 
 export type ModelSelector<S = any, T = any> = (state, params?: T) => S;
 
@@ -75,7 +73,7 @@ export interface ModelActions {
 
 declare abstract class Model<S> {
   static namespace: string;
-  static reducers: ModelReducersMapObject;
+  static reducers: ModelReducers;
 
   namespace: string;
   types: ModelTypes;
@@ -207,17 +205,18 @@ declare abstract class ListPage<
   public static defaultState: ListPageState;
 
   // reducers
-  public static reducers: {
-    invalidate: ModelReducer<ListPageState>;
-    initiateRequest: ModelReducer<ListPageState>;
-    initiateFailure: ModelReducer<ListPageState>;
-    initiateSuccess: ModelReducer<ListPageState>;
-    initiateExtrasSuccess: ModelReducer<ListPageState>;
-    loadMoreRequest: ModelReducer<ListPageState>;
-    loadMoreFailure: ModelReducer<ListPageState>;
-    loadMoreCancel: ModelReducer<ListPageState>;
-    loadMoreSuccess: ModelReducer<ListPageState>;
-  };
+  // public static reducers: {
+  //   invalidate: ModelReducer<ListPageState>;
+  //   initiateRequest: ModelReducer<ListPageState>;
+  //   initiateFailure: ModelReducer<ListPageState>;
+  //   initiateSuccess: ModelReducer<ListPageState>;
+  //   initiateExtrasSuccess: ModelReducer<ListPageState>;
+  //   loadMoreRequest: ModelReducer<ListPageState>;
+  //   loadMoreFailure: ModelReducer<ListPageState>;
+  //   loadMoreCancel: ModelReducer<ListPageState>;
+  //   loadMoreSuccess: ModelReducer<ListPageState>;
+  // };
+  public static reducers: ModelReducers;
 
   // constructor
   constructor(namespace, options: ListPageOptions);
@@ -304,14 +303,15 @@ declare abstract class DetailPage<
   // state
   public static defaultState: DetailPageState;
 
-  public static reducers: {
-    reset: ModelReducer<ListPageState>;
-    invalidate: ModelReducer<ListPageState>;
-    initiateRequest: ModelReducer<ListPageState>;
-    initiateFailure: ModelReducer<ListPageState>;
-    initiateSuccess: ModelReducer<ListPageState>;
-    initiateExtrasSuccess: ModelReducer<ListPageState>;
-  };
+  // public static reducers: {
+  //   reset: ModelReducer<ListPageState>;
+  //   invalidate: ModelReducer<ListPageState>;
+  //   initiateRequest: ModelReducer<ListPageState>;
+  //   initiateFailure: ModelReducer<ListPageState>;
+  //   initiateSuccess: ModelReducer<ListPageState>;
+  //   initiateExtrasSuccess: ModelReducer<ListPageState>;
+  // };
+  public static reducers: ModelReducers;
 
   constructor(namespace, options: DetailPageOptions);
 
@@ -386,12 +386,13 @@ declare abstract class NormalPage<
   // state
   public static defaultState: NormalPageState;
 
-  public static reducers: {
-    invalidate: ModelReducer<ListPageState>;
-    initiateRequest: ModelReducer<ListPageState>;
-    initiateFailure: ModelReducer<ListPageState>;
-    initiateSuccess: ModelReducer<ListPageState>;
-  };
+  // public static reducers: {
+  //   invalidate: ModelReducer<ListPageState>;
+  //   initiateRequest: ModelReducer<ListPageState>;
+  //   initiateFailure: ModelReducer<ListPageState>;
+  //   initiateSuccess: ModelReducer<ListPageState>;
+  // };
+  public static reducers: ModelReducers;
 
   constructor(namespace, options: DetailPageOptions);
 
