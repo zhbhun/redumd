@@ -5,7 +5,7 @@ import {
 import { Reducer, Action, ReducersMapObject, Store } from "redux";
 import { Effect } from "redux-saga";
 
-export interface ModelAction<P, M> extends Action {
+export interface ModelAction<P = any, M = any> extends Action {
   payload?: P;
   meta?: M;
 }
